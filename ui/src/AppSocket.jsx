@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Scroll from "react-scroll";
 import { socket } from "./socket";
+import MsgList from "./MsgList";
+import MsgInput from "./MsgInput";
 const scroll = Scroll.animateScroll;
 
 function AppSocket() {
@@ -44,43 +46,14 @@ function AppSocket() {
 
   return (
     <>
-      <div className="container pb-5">
-        <ul>
-          {messages &&
-            messages.map((m) => (
-              <li key={m._id}>
-                <i>{m.from}:</i> {m.text}
-              </li>
-            ))}
-        </ul>
-      </div>
-
-      <div className="fixed-bottom">
-        <div className="container">
-          <div className="row">
-            <div className="col-2">
-              <input
-                className="w-100"
-                value={user}
-                onChange={(e) => setUser(e.currentTarget.value)}
-              />
-            </div>
-            <div className="col-7">
-              <input
-                className="w-100"
-                value={text}
-                onChange={(e) => setText(e.currentTarget.value)}
-                onKeyDown={(e) => e.code === "Enter" && onSubmit()}
-              />
-            </div>
-            <div className="col-3">
-              <button className="btn btn-primary" onClick={onSubmit}>
-                Invia
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MsgList messages={messages} />
+      <MsgInput
+        user={user}
+        setUser={setUser}
+        text={text}
+        setText={setText}
+        onSubmit={onSubmit}
+      />
     </>
   );
 }

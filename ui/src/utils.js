@@ -1,6 +1,3 @@
-export const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
-// SUPPORT fn
 export async function postMessage(data) {
   const response = await fetch("/messages", {
     method: "POST", // or 'PUT'
@@ -10,5 +7,10 @@ export async function postMessage(data) {
     body: JSON.stringify(data),
   });
 
+  return response.json();
+}
+
+export async function getMessages() {
+  const response = await fetch("/messages");
   return response.json();
 }

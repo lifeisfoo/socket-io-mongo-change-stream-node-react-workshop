@@ -1,61 +1,43 @@
-import { useState } from "react";
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 import Scroll from "react-scroll";
-import { fetcher, postMessage } from "./utils";
+import { postMessage, getMessages } from "./utils";
+import MsgList from "./MsgList";
+import MsgInput from "./MsgInput";
 const scroll = Scroll.animateScroll;
 
 function AppHttp() {
   const [text, setText] = useState("");
   const [user, setUser] = useState("guest");
+  const [messages, setMessages] = useState([]);
 
-  const { data: messages, mutate } = useSWR("/messages", fetcher);
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const msgs = await getMessages();
+      const newMsgs = msgs.length > messages.length;
+      setMessages(msgs);
+      if (newMsgs) {
+        scroll.scrollToBottom();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [messages, setMessages, scroll]);
 
   const onSubmit = () => {
     postMessage({ from: user, text }).then(() => {
       setText("");
-      mutate().then(() => scroll.scrollToBottom());
     });
   };
 
   return (
     <>
-      <div className="container pb-5">
-        <ul>
-          {messages &&
-            messages.map((m) => (
-              <li key={m._id}>
-                <i>{m.from}:</i> {m.text}
-              </li>
-            ))}
-        </ul>
-      </div>
-
-      <div className="fixed-bottom">
-        <div className="container">
-          <div className="row">
-            <div className="col-2">
-              <input
-                className="w-100"
-                value={user}
-                onChange={(e) => setUser(e.currentTarget.value)}
-              />
-            </div>
-            <div className="col-7">
-              <input
-                className="w-100"
-                value={text}
-                onChange={(e) => setText(e.currentTarget.value)}
-                onKeyDown={(e) => e.code === "Enter" && onSubmit()}
-              />
-            </div>
-            <div className="col-3">
-              <button className="btn btn-primary" onClick={onSubmit}>
-                Invia
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MsgList messages={messages} />
+      <MsgInput
+        user={user}
+        setUser={setUser}
+        text={text}
+        setText={setText}
+        onSubmit={onSubmit}
+      />
     </>
   );
 }
